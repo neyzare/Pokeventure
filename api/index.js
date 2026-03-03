@@ -38,20 +38,32 @@ export default async function handler(req, res) {
         return;
     }
 
-    // SSR with Vike
-    const pageContext = await renderPage({ urlOriginal: url });
-    const { httpResponse } = pageContext;
+    // SSR with Vike - use original URL from Vercel rewrite if available
+    const originalUrl = req.headers["x-invoke-path"] ?? req.headers["x-middleware-request-path"] ?? url;
+    const urlToRender = originalUrl.startsWith("/") ? originalUrl : url;
 
-    if (!httpResponse) {
-        res.statusCode = 404;
-        res.end("Not found");
-        return;
-    }
+    try {
+        const pageContext = await renderPage({ urlOriginal: urlToRender });
+        const { httpResponse } = pageContext;
 
-    const { body, statusCode, headers } = httpResponse;
-    res.statusCode = statusCode;
-    for (const [key, value] of headers) {
-        res.setHeader(key, value);
+        if (!httpResponse) {
+            res.statusCode = 404;
+            res.end("Not found");
+            return;
+        }
+
+        const { body, statusCode, headers } = httpResponse;
+        res.statusCode = statusCode;
+        for (const [key, value] of headers) {
+            res.setHeader(key, value);
+        }
+        res.end(body);
+    } catch (err) {
+        console.error("[SSR Error]", err);
+        res.statusCode = 500;
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        res.end(
+            `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Erreur</title></head><body style="font-family:sans-serif;padding:2rem;max-width:600px;margin:0 auto"><h1>Une erreur est survenue</h1><p>Veuillez réessayer plus tard.</p></body></html>`
+        );
     }
-    res.end(body);
 }
