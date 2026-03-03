@@ -40,7 +40,9 @@ export default async function handler(req, res) {
 
     // SSR with Vike - use original URL from Vercel rewrite if available
     const originalUrl = req.headers["x-invoke-path"] ?? req.headers["x-middleware-request-path"] ?? url;
-    const urlToRender = originalUrl.startsWith("/") ? originalUrl : url;
+    let urlToRender = originalUrl.startsWith("/") ? originalUrl : url;
+    // Vercel rewrite can pass /api as url - fallback to / for SPA routing
+    if (urlToRender === "/api") urlToRender = "/";
 
     try {
         const pageContext = await renderPage({ urlOriginal: urlToRender });
@@ -60,10 +62,20 @@ export default async function handler(req, res) {
         res.end(body);
     } catch (err) {
         console.error("[SSR Error]", err);
+        const errMsg = err?.message ?? String(err);
+        const errStack = err?.stack ?? "";
         res.statusCode = 500;
         res.setHeader("Content-Type", "text/html; charset=utf-8");
         res.end(
-            `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Erreur</title></head><body style="font-family:sans-serif;padding:2rem;max-width:600px;margin:0 auto"><h1>Une erreur est survenue</h1><p>Veuillez réessayer plus tard.</p></body></html>`
+            `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Erreur</title></head><body style="font-family:sans-serif;padding:2rem;max-width:800px;margin:0 auto"><h1>Une erreur s'est produite</h1><p><strong>Détails :</strong> ${escapeHtml(errMsg)}</p><pre style="background:#f5f5f5;padding:1rem;overflow:auto;font-size:12px">${escapeHtml(errStack)}</pre></body></html>`
         );
     }
+}
+
+function escapeHtml(s) {
+    return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
 }
