@@ -149,3 +149,5 @@ dist
 cdk.out
 
 /generated/prisma
+.vercel
+.env*.local
