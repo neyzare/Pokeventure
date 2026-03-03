@@ -1,12 +1,21 @@
-import { usePageContext } from "vike-react/usePageContext";
+"use client";
 
-export function Link({ href, children }: { href: string; children: string }) {
-  const pageContext = usePageContext();
-  const { urlPathname } = pageContext;
-  const isActive = href === "/" ? urlPathname === href : urlPathname.startsWith(href);
+import NextLink from "next/link";
+import { usePathname } from "next/navigation";
+
+export function Link({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname() ?? "/";
+  const isActive =
+    href === "/" ? pathname === href : pathname.startsWith(href);
   return (
-    <a href={href} className={isActive ? "is-active" : undefined}>
+    <NextLink href={href} className={isActive ? "is-active" : undefined}>
       {children}
-    </a>
+    </NextLink>
   );
 }

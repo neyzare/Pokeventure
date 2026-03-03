@@ -1,6 +1,8 @@
+"use client";
+
 import React from "react";
 import { Grid, type CellComponentProps } from "react-window";
-import type { Pokemon } from "../type/pokedex";
+import type { Pokemon } from "@/type/pokedex";
 import { PokemonCard } from "./pokemonCard";
 
 type CellProps = { pokemon: Pokemon[]; columns: number };

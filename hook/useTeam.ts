@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { getMyTeam } from "../telefunc/team.telefunc";
+import { getMyTeamAction } from "@/app/actions/team";
 
 export function useTeam(enabled: boolean) {
   const [loading, setLoading] = useState(true);
@@ -8,7 +8,7 @@ export function useTeam(enabled: boolean) {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getMyTeam();
+      const res = await getMyTeamAction();
       if (res.success) setTeam(res.team);
       else setTeam([]);
     } catch {

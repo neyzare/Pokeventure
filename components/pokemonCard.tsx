@@ -1,6 +1,8 @@
-import type { Pokemon } from "../type/pokedex";
-import { usePokemonDetails } from "../pages/pokedex/pokemonDetails";
-import { typeToBg } from "../pages/pokedex/typeStyles";
+"use client";
+
+import type { Pokemon } from "@/type/pokedex";
+import { usePokemonDetails } from "@/lib/pokemonDetails";
+import { typeToBg } from "@/lib/typeStyles";
 
 function pad3(n: number) {
   return String(n).padStart(3, "0");
